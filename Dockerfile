@@ -1,24 +1,24 @@
-# Gunakan image dasar Ubuntu 22.04
 FROM ubuntu:22.04
 
-# Set environment variable untuk menghindari interaksi non-interaktif selama instalasi
-ENV DEBIAN_FRONTEND=noninteractive
+LABEL An Decentralized IP Marketplace to Leave Your Limitations Behind. <www.bura.dev>
 
-# Update dan instal dependensi yang dibutuhkan
-RUN apt-get update && apt-get install -y \
-    curl \
-    sudo \
-    tar \
-    --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+      apt-get -y install sudo curl tar ca-certificates
+	  
+# Create ubuntu user with sudo privileges
+RUN useradd -ms /bin/bash ubuntu && \
+    usermod -aG sudo ubuntu 
+# New added for disable sudo password
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Salin script untuk menjalankan node
-WORKDIR /usr/src/app
-COPY entrypoint.sh .
+# Fix upstart
+RUN rm -rf /sbin/initctl && ln -s /sbin/initctl.distrib /sbin/initctl
 
-# Berikan izin eksekusi pada script
-RUN chmod +x entrypoint.sh
+# Set as default user
+USER ubuntu
 
-# Eksekusi script saat container dijalankan
-CMD ["./entrypoint.sh"]
+WORKDIR /myApp
+COPY . .
+
+RUN sudo chmod 777 ./gaganode_install.sh
+CMD ./gaganode_install.sh ; sleep infinity
